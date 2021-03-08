@@ -1,0 +1,8 @@
+App node
+- package.json describes the app (name, dependencies for prod and dev env)
+- npm install will install dependencies on the package.json basis (in the node_modules dir)
+
+
+docker-compose
+- always need a dockerfile
+- updates of a Dockerfile = remake docker-compose build

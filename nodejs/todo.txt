@@ -1,0 +1,14 @@
+1: Setup
+
+1.1: 
+- Faire un docker compose qui va lancer un script node affichant hello world, 
+- ainsi qu'une base de données (SQL) (tu peux t'inspirer de nomnomnom si tu veux)
+Utiliser le package nodemon, et le systeme de volume docker, afin de watch le fichier et relancer le script lors de la modification du fichier
+
+2: Mettre en place la base de données
+Installer le package knex, et utiliser le systeme de migration, afin de créer une table user comportant les champs username, et password en string, créer également le rollback
+afin de remettre la base dans son état initial
+
+3: Mettre en place le server express:
+Faire en sorte de pouvoir accéder au port 8080 du container node depuis le host.
+Utiliser express, afin de retourner hello world lors d'un get sur /

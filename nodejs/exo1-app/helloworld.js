@@ -1,21 +1,19 @@
-console.log("hello world");
+var express = require("express");
+var app = express();
 
-// const knex = require("knex")({
-//   client: "pg",
-//   connection: process.env.PG_CONNECTION_STRING,
-//   searchPath: ["knex", "public"],
-// });
+const config = {
+  name: "exo_1_app",
+  port: 8080,
+};
 
-// exports.up = function (knex) {
-//   return knex.schema.createTable("users", function (table) {
-//     table.increments("id");
-//     table.string("username", 255).notNullable();
-//     table.string("password", 255).notNullable();
-//   });
-// };
+// respond with "hello world" when a GET request is made to the homepage
+app.get("/", function (req, res) {
+  res.send("hello world");
+});
 
-// exports.down = function (knex) {
-//   return knex.schema.dropTable("users");
-// };
-
-// exports.config = { transaction: false };
+app.listen(config.port, (e) => {
+  if (e) {
+    throw new Error("Internal Server Error");
+  }
+  console.log(`${config.name} running on ${config.port}`);
+});

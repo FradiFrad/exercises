@@ -1,8 +1,27 @@
 App node
 - package.json describes the app (name, dependencies for prod and dev env)
-- npm install will install dependencies on the package.json basis (in the node_modules dir)
+- npm install or yarn add will install dependencies on the package.json basis (in the node_modules dir)
+- npm install -g : install globally, everywhere on the computer/the container. So I can use command like "nodemon". If not, just a dir in node_modules.
+    => that's why I can't use "nodemon" command in my Dockerfile after npm install
+    => use the package.json scripts that can match commands with packages in node_modules :
+    => npm command will wtach the package.json
+- access to .env : package dotenv, then access via process.env
+- Differences btw npm and yarn ?
+
+Express and server config
+- when app.listen() don't put "host" param in there, because if it's "localhost", it's gonna be localhost in your Docker container and I dunno what reality it covers but it's not gonna work. Just put your port.
 
 
 docker-compose
 - always need a dockerfile
 - updates of a Dockerfile = remake docker-compose build
+- create a DB : just add an image in docker-compose with the credentials
+- access to .env : ${YOUR_ENV_VAR}
+
+
+
+.dockerignore 
+create the file in the same directory as your Dockerfile with following content:
+node_modules
+npm-debug.log
+This will prevent your local modules and debug logs from being copied onto your Docker image and possibly overwriting modules installed within your image.

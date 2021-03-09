@@ -1,0 +1,14 @@
+{
+  "name": "exo_1_app",
+  "version": "1.0.0",
+  "description": "Node.js on Docker",
+  "author": "FradiFrad",
+  "main": "helloworld.js",
+  "scripts": {
+    "start": "nodemon helloworld.js"
+  },
+  "dependencies": {
+    "express": "^4.16.1",
+    "nodemon": "^2.0.7"
+  }
+}

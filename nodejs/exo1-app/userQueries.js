@@ -5,8 +5,13 @@ const createUser = async (username, hashedPassword) => {
     username: username,
     password: hashedPassword,
   });
+  delete newUser.password;
+  delete newUser.id;
 
-  console.log(newUser.username);
+  // const { password, id, ...user } = newUser;
+  return newUser;
+
+  // console.log(newUser.username);
 };
 
 module.exports = createUser;

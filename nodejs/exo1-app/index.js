@@ -4,9 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const UserSchema = require("./validation");
-const Joi = require("joi");
 const bcrypt = require("bcrypt");
-const saltRounds = 10;
 const createUser = require("./userQueries");
 
 // Give the knex instance to objection.
@@ -28,19 +26,24 @@ app.get("/", function (req, res) {
   res.send("hello world");
 });
 
-app.post("/signup", function (req, res) {
-  const result = UserSchema.validate(req.body);
-  if (result.error) {
-    res.send(result.error.details);
-  } else {
-    bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
-      // Store hash in your password DB.
-      let newUser = createUser(req.body.username, hash);
-      // console.log(newUser);
-    });
-    res.send("success");
+app.post("/signup", async function (req, res) {
+  const validation = UserSchema.validate(req.body);
+  if (validation.error) {
+    return res.send(validation.error.details);
+  }
+  try {
+    let hash = await hashPassword(req.body.password);
+    let newUser = await createUser(req.body.username, hash);
+    return res.json(newUser);
+  } catch (error) {
+    return res.send(error);
   }
 });
+
+const hashPassword = (password) => {
+  const saltRounds = 10;
+  return bcrypt.hash(password, saltRounds);
+};
 
 app.listen(config.port, (e) => {
   if (e) {

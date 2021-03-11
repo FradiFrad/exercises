@@ -21,29 +21,19 @@ const config = {
 // app.use(bodyParser.json);
 app.use(bodyParser.json());
 
-// respond with "hello world" when a GET request is made to the homepage
-app.get("/", function (req, res) {
-  res.send("hello world");
-});
-
 app.post("/signup", async function (req, res) {
   const validation = UserSchema.validate(req.body);
   if (validation.error) {
-    return res.send(validation.error.details);
+    return res.status(500).json(validation.error.details);
   }
   try {
-    let hash = await hashPassword(req.body.password);
-    let newUser = await createUser(req.body.username, hash);
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const newUser = await createUser(req.body.username, hashedPassword);
     return res.json(newUser);
-  } catch (error) {
-    return res.send(error);
+  } catch (e) {
+    return res.status(500).json("Sorry, there is an error");
   }
 });
-
-const hashPassword = (password) => {
-  const saltRounds = 10;
-  return bcrypt.hash(password, saltRounds);
-};
 
 app.listen(config.port, (e) => {
   if (e) {

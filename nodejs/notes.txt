@@ -10,7 +10,23 @@ App node
 
 Express and server config
 - when app.listen() don't put "host" param in there, because if it's "localhost", it's gonna be localhost in your Docker container and I dunno what reality it covers but it's not gonna work. Just put your port.
+- WARNING : there are many ways to POST data, before we can get started 
+accessing POST data right away, we need to properly configure our Express app. 
+This configuration needs to be done since not all web app servers need body parsing, and what body parsing is enabled depends on your application.
+To set this up, we'll be using the body-parser package, which can handle many forms of data. 
+This package is a middleware that intercepts the raw body
+ and parses it in to a form that your application code can easily use.
 
+Require vs import
+- require in node
+- import in typescript
+
+
+Javascript
+- check async wait
+- check delete for objects keys
+- si fonction takes time, returns a Promise
+    - if a function returns a Promise, I can't return a value, just a Promise
 
 docker-compose
 - always need a dockerfile
@@ -18,7 +34,8 @@ docker-compose
 - create a DB : just add an image in docker-compose with the credentials
 - access to .env : ${YOUR_ENV_VAR}
 
-
+Docker usage
+- WARNING : pay attention to where you launch the commands : on your computer or in the container? the host changes accordingly !
 
 .dockerignore 
 create the file in the same directory as your Dockerfile with following content:

@@ -1,6 +1,21 @@
 # Accelerator App test assignment
 
+## Setup
+
+- Copy `.env.dist` into `.env`
+  - if necessary, edit `DATABASE_URL` value
+  - /!\ WARNING: do not put quotes on your value, to avoid any Prisma error
+
+- Launch the app (if you want the logs, remove `-d` option):
+
+```cli
+docker-compose up -d
+```
+
+- Go on localhost:4000 to access the queries playground
+
 ## Goals
+
 In this test, you want to see your ability to manipulate transactions like data in aggregation and reporting.
 
 This take-home is meant to be a POC rather than a full fledge project but one that demonstrates your understanding of data storing, retrieving, and aggregation in an effective manner.

@@ -1,12 +1,15 @@
 scalar Date
  
 type Query {
-    getPizzas: [Pizza]
-    getOnePizza(id: ID, name: String): Pizza
+    getPizzas(pizzasInput:PizzasInput): [Pizza]
+    getPizza(id: ID): Pizza
     getOrders(ordersInput: OrdersInput): [Order]
-    # getOrdersSimple(pizzaId:ID): [Order]
-    # getRecipeForOnePizza(pizzaId: ID!): [Recipe]
-    # getOrdersForOnePizza(pizzaId: ID!): [Order]
+    getRecipeForOnePizza(pizzaId: ID!): [Recipe]
+}
+
+input PizzasInput {
+  names: [PizzaName]
+  ids: [ID]
 }
 
   input OrdersInput {
@@ -15,18 +18,16 @@ type Query {
     startingDate: Date
     endingDate: Date
   }
- 
+
  type Pizza {
     id:ID!
     name: String!
     price: Int!
     recipes: [Recipe]
-    orders: [Order]
   }
 
 type Order {
   id:ID!
-  pizzaId: ID
   pizza:     Pizza   
   quantity:    Int
   date:      Date
@@ -34,10 +35,8 @@ type Order {
 
 type Recipe {
   id:ID!
-  pizzaId: ID!
   pizza:     Pizza   
   ingredient:    Ingredient
-  ingredientId: ID!
   quantity:    Int
 }
 
@@ -46,54 +45,10 @@ type Ingredient {
   name: String!
   unit:     String! #TODO: change to enum   
   price:    Float
-  recipe: [Recipe]
 }
 
-
-# To create a multi-parameter filter, you can use 
-  # the and keyword to concatenate the filter requirements onto your query.
-  # In the query below, we are looking at a list of completed carts where the total purchase order is over $150.00.
-
-#  query {
-#     queryCart(filter{
-#       id: ["UUID2098", "UUID92083", "UUID98332", "UUID2833"]
-#     },
-#     and: {
-#       totalPrice: {
-#         gt: 150.00
-#       }
-#     }){
-#       id
-#       totalPrice
-#       numberOfItems
-#     }
-#  }
-
-#   query {
-#   queryEvent (filter: { date: { between: { min: "2020-01-01", max: "2020-02-01" } } }) {
-#     id
-#   }
-# }
-
-
-# type MovieFilters = {
-
-#   ids: [ID!]
-
-#   director: Director
-
-# }
-
-# type MoviesInput = {
-
-#   filter: MovieFilters
-
-# }
-
-# type Query {
-
-#   movie(id: ID!) : Movie
-
-#   movies(input: MoviesInput) : [Movie]!
-
-# }
+enum PizzaName {
+  Pepperoni
+  Branco
+  AllDressed
+}

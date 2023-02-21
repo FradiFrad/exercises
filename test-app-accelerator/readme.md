@@ -12,109 +12,66 @@
 docker-compose up -d
 ```
 
-- Go on localhost:4000 to access the queries playground
+- Initialize the database and seed it:
 
-## Goals
+```cli
+docker-compose exec apollo-graphql-server npx prisma migrate dev --name init 
+```
 
-In this test, you want to see your ability to manipulate transactions like data in aggregation and reporting.
+- Go on localhost:4000 to access the queries playground!
+
+## Implementation choices, issues and work in progress
+
+- Main difficulty: first time with GraphQL and its whole ecosystem. Good practices are not well known and it can be hard to think an API outside the REST concept.
+- Difficulty to understand the assignments features (for instance: "The front-end team needs an API that will return the data in total for the selected period and in increments of weeks to display the data in graphs that displays the number per week.")
+- The queries filters are incomplete
+- The error handling is minimal and should be improved
+- No unit and integration tests for lack of time
+- If this POC were to be used in production, a parser of .csv should be added to the project to automate the data import.
+- Since GraphQL does not support a Date type, we had to build our own. It could be optimized according the Frontend needs
+- For more security, Replace the actual ID system with some UUID
+- For now, the app architecture is very technical centred, and defined by the tools we use (for instance, Prisma). It works with a small project, but not with bigger ones. Other was, such as a DDD, should be considered.
+- Configuration difficulty: issues while compiling .graphql files and to dockerize prisma commands
+- For now, the Dockerfile is only development ready and should be updated if necessary for production environment.
+
+To get more details, all work in progress has a "TODO" comment in the code.
+
+## Assignment goals and specifications
+
+"In this test, you want to see your ability to manipulate transactions like data in aggregation and reporting.
 
 This take-home is meant to be a POC rather than a full fledge project but one that demonstrates your understanding of data storing, retrieving, and aggregation in an effective manner.
 
-## Data
+- Data
 
-- You have a pizza shop with 3 types of pizza:
-  - Pepperoni
-  - Branco
-  - All dressed
-  
-- You have sold pizza in the past year (2022), and now you need to build a graphQl API to analyze this data. [Here are the assumptions](https://docs.google.com/spreadsheets/d/1byShULmKZCmGqfLSUwh1RWWcEUPgZq3FRwYHJpV1ZXo/edit?usp=sharing
-).
+  - You have a pizza shop with 3 types of pizza:
+    - Pepperoni
+    - Branco
+    - All dressed
+  - You have sold pizza in the past year (2022), and now you need to build a graphQl API to analyze this data. [Here are the assumptions](https://docs.google.com/spreadsheets/d/1byShULmKZCmGqfLSUwh1RWWcEUPgZq3FRwYHJpV1ZXo/edit?usp=sharing
+  ).
 
-## Queries
+- Queries
 
-- You need to create a graphQL API that will return data with these filters:
-  - time: (period start date, end date) or per selected calendar month
-  - selected pizza(s) or all pizza
+  - You need to create a graphQL API that will return data with these filters:
+    - time: (period start date, end date) or per selected calendar month
+    - selected pizza(s) or all pizza
 
-- You should be able to query the following information through the above filters:
-  - unit sold
-  - ingredients used
-  - Cost of ingredients
-  - Sales
-
-## API
+  - You should be able to query the following information through the above filters:
+    - unit sold
+    - ingredients used
+    - Cost of ingredients
+    - Sales
 
 - The front-end team needs an API that will return the data in total for the selected period and in increments of weeks to display the data in graphs that displays the number per week.
 
-## Technical specifications
-
-- You should use whichever database you want
-- use Typescript with whatever library you want.
-- The application should be Dockerized.
+- Technical specifications
+  - You should use whichever database you want
+  - use Typescript with whatever library you want.
+  - The application should be Dockerized.
 
 Once completed, paste the link of your GitHub repo (publicly open) in the form accessible by the button below.
 
-## Tests
-
 BONUS: add an integration test on a query.
 
-## Implementation choices
 
-### Data handling
-
-- The choice has been made to transform the .csv data into .json. Since the data set was small, and the main goal was to build a GraphQL POC, the transformation was handled by hand, to simplify the import and not waste some time into parsing.
-- If this POC were to be used in production, a parser should be added via the library xxx to automate the data import.
-
-## Add UUID
-
-x
-
-## Date
-Not graphql-iso-date because not updated
-// TODO: change the date format (from timestamp to readable string). For now, must be handled by the front
-
-## Archi
-
-SImple for now but may need reflexion
-cf https://jaredgorski.org/writing/designing-a-graphql-server/
-
-## Queries
-
-- getPizzas
-  - filtered by
-    - [id1, id2...]
-    - time: (period start date, end date) or per selected calendar month
-    - orders
-    - recipe (ingredients used)
-    -   - Cost of ingredients
-    - default: all
-- getPizza
-  - filtered by
-    - id
-    - name
-    - time: (period start date, end date) or per selected calendar month
-    - orders
-    - recipe (ingredients used)
-    -   - Cost of ingredients
-- getOrders
-  - filtered by
-    - time: (period start date, end date) or per selected calendar month
-
-- todo: group recipe because it appears at each order
-- todo: add type input
-- 
- You need to create a graphQL API that will return data with these filters:
-  - time: (period start date, end date) or per selected calendar month
-  - selected pizza(s) or all pizza
-
-- You should be able to query the following information through the above filters:
-  - unit sold
-  - ingredients used
-  - Cost of ingredients
-  - Sales
-
-## API
-
-- The front-end team needs an API that will return the data in total for the selected period and in increments of weeks to display the data in graphs that displays the number per week.
-
-build not comoile graphql file

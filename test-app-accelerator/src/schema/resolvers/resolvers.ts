@@ -3,9 +3,12 @@ import { GraphQLScalarType, Kind } from "graphql";
 
 const prisma = new PrismaClient();
 
-// We have to create our own Date type 
-// cf: https://www.apollographql.com/docs/apollo-server/schema/custom-scalars/#example-the-date-scalar
-// TODO: change the date format (from timestamp to readable string). For now, must be handled by the front
+/*
+*   We have to create our own Date type 
+*     -> cf: https://www.apollographql.com/docs/apollo-server/schema/custom-scalars/#example-the-date-scalar
+*   TODO: change the date format (from timestamp to readable string). 
+*   For now, must be handled by the front
+*/
 const dateScalar = new GraphQLScalarType({
     name: 'Date',
     description: 'Date custom scalar type',
@@ -31,37 +34,46 @@ const dateScalar = new GraphQLScalarType({
     },
 });
 
-// Resolvers define how to fetch the types defined in your schema.
-// TODO: type correctly resolver's arguments
-// TODO: rm https://www.prisma.io/docs/concepts/components/prisma-client/select-fields
-// where = args.filter ? {
-// OR: [
-//     { description_contains: args.filter },
-//     { url_contains: args.filter },
-//   ],
-// } : {}
-type GetPizzasFilteredQuery = {
-    name: PizzaName
-    id: number
+// TODO: find a way to export input type from schema.graphql
+type GetPizzasQuery = {
+    names: [PizzaName]
+    ids: [number]
 }
 
-// TODO: find a way to export OrdersInput from schema.graphql
 type GetOrdersQuery = {
     orderIds: [number]
     pizzaIds: [number]
     startingDate: Date
     endingDate: Date
 }
+
+const getPizzasQuery = (pizzasInput: GetPizzasQuery) => {
+    let andWhere: Prisma.PizzaWhereInput[] = [];
+    const { ids, names } = pizzasInput;
+
+    if (ids) {
+        andWhere.push({
+            id: {
+                in: ids.map(Number)
+            },
+        })
+    }
+
+    if (names) {
+        andWhere.push({
+            name: {
+                in: names
+            },
+        })
+    }
+    return andWhere
+
+}
+
+
 const getOrdersQuery = (ordersInput: GetOrdersQuery) => {
     let andWhere: Prisma.OrderWhereInput[] = [];
-    console.log(ordersInput)
     const { orderIds, pizzaIds, startingDate, endingDate } = ordersInput;
-
-    console.log("pizzaIds", pizzaIds,
-        "startingDate", startingDate,
-        "endingDate", endingDate,
-        "orderIds", orderIds)
-
     if (orderIds) {
         andWhere.push({
             id: {
@@ -90,45 +102,39 @@ const getOrdersQuery = (ordersInput: GetOrdersQuery) => {
     return andWhere
 
 }
+
 export const resolvers = {
     Date: dateScalar,   // Have to define a custom date type
     Query: {
         getPizzas: async (parent: any, args: any, context: any, info: any) => {
-            console.log("args", args.ids, args.name, args.length)
-            const where: Partial<GetPizzasFilteredQuery> = {}
-            // if (args.name) {
-            //     where.name = args.name
-            // }
-            return await prisma.pizza.findMany({
-                where
-            })
-        },
-        /*
-        *   Access one pizza, with its recipe, ingredients and orders.
-        *   The paramater "args" can contain:
-        *       - name: to find by name
-        *       - id: to find by id
-        *       - startDate: 
-        *       - endDate:
-        *       - month:
-        *       
-        */
-        getOnePizza: async (parent: any, args: any, context: any, info: any) => {
             try {
-                console.log("args", args)
+                let where
+                if (args === undefined) {
+                    where = {}
+                } else {
+                    const andWhere: Prisma.PizzaWhereInput[] = getPizzasQuery(args.pizzasInput);
+                    where = {
+                        AND: andWhere
+                    }
+                }
 
-                const { id, name } = (args);
-                console.log("pizzaId", id, name)
-
-                const where: Partial<GetPizzasFilteredQuery> = {}
-                // TODO: handle case with 2 if
-                if (args.name) where.name = args.name
-                if (args.id) where.id = Number(args.id)
-
+                const res = await prisma.pizza.findMany({
+                    where: where
+                })
+                return res
+            } catch (e) {
+                console.error("Error in getPizzas Query: ", e, "args:", args);
+            }
+        },
+        // TODO: add filter by name
+        getPizza: async (parent: any, args: any, context: any, info: any) => {
+            const { id } = args
+            try {
                 const res = await prisma.pizza.findUnique({
-                    where,
+                    where: {
+                        id: Number(id),
+                    },
                     include: {
-                        orders: true,
                         recipes: {
                             include: {
                                 ingredient: true,
@@ -136,82 +142,16 @@ export const resolvers = {
                         },
                     },
                 })
-                // {
-                //     select: {
-                //         ingredient: true
-                //     }
-                // },
-                // include: {
-                //     posts: {
-                //       select: {
-                //         title: true,
-                //       },
-                //     },
 
-                // select: {
-                //     name: true,
-                //     posts: {
-                //       select: {
-                //         title: true,
-                //       },
-
-                console.log("res", res)
                 return res
             } catch (e) {
-                console.error("Error in getOnePizza Query: ", e);
+                console.error("Error in getOnePizza Query: ", e, "id:", id);
             }
         },
-        // getOrdersSimple: async (parent: any, args: any, context: any, info: any) => {
-        //     try {
-        //         const { pizzaId } = (args);
-        //         console.log("pizzaId", Number(pizzaId))
-
-        //         const res = await prisma.order.findMany({
-        //             where: {
-        //                 pizzaId: Number(pizzaId)
-        //             },
-        //             select: {
-        //                 id: true,
-        //                 quantity: true,
-        //                 date: true,
-        //                 // pizza: {
-        //                 //     select: {
-        //                 //         id: true,
-        //                 //         name: true,
-        //                 //         price: true,
-        //                 //         recipes: {
-        //                 //             select: {
-        //                 //                 ingredient: {
-        //                 //                     select: {
-        //                 //                         id: true,
-        //                 //                         name: true,
-        //                 //                         price: true,
-        //                 //                         unit: true
-        //                 //                     }
-        //                 //                 },
-        //                 //                 quantity: true
-        //                 //             }
-        //                 //         }
-        //                 //     }
-        //                 // }
-        //             },
-        //         })
-
-        //         console.log("res", res, "length", res.length)
-        //         return res
-        //     } catch (e) {
-        //         console.error("Error in getOnePizza Query: ", e);
-        //     }
-        // },
-        // TODO: add filter by pizzaName
         // TODO: add filter by month name
         getOrders: async (parent: any, args: any, context: any, info: any) => {
             try {
-                // const where: Partial<GetPizzasFilteredQuery> = {}
-                console.log("args", args)
-
-                let andWhere: Prisma.OrderWhereInput[] = getOrdersQuery(args.ordersInput);
-                console.log("andWhere", andWhere)
+                const andWhere: Prisma.OrderWhereInput[] = getOrdersQuery(args.ordersInput);
                 const res = await prisma.order.findMany({
                     where: {
                         AND: andWhere
@@ -243,82 +183,33 @@ export const resolvers = {
                     },
                 })
 
-                console.log("length", res.length)
                 return res
             } catch (e) {
                 console.error("Error in getOrders Query: ", e);
             }
         },
-        // getRecipeForOnePizza: async (parent: any, args: any, context: any, info: any) => {
-        //     try {
-        //         const { pizzaId } = args;
+        getRecipeForOnePizza: async (parent: any, args: any, context: any, info: any) => {
+            try {
+                const { pizzaId } = args;
 
-        //         console.log("pizzaId", pizzaId)
-        //         const res = await prisma.recipe.findMany({
-        //             where: {
-        //                 pizzaId: Number(pizzaId)
-        //             },
-        //             include: {
-        //                 ingredient: true,
-        //                 pizza: {
-        //                     select: {
-        //                         name: true
-        //                     }
-        //                 },
-        //             },
-        //         })
-        //         console.log("res", res)
-        //         return res
+                const res = await prisma.recipe.findMany({
+                    where: {
+                        pizzaId: Number(pizzaId)
+                    },
+                    include: {
+                        ingredient: true,
+                        pizza: {
+                            select: {
+                                name: true
+                            }
+                        },
+                    },
+                })
 
-
-        //     } catch (e) {
-        //         console.error("Error in getRecipeForOnePizza Query: ", e);
-        //     }
-        // },
-        // getOrdersForOnePizza: async (parent: any, args: any, context: any, info: any) => {
-        //     try {
-        //         const { pizzaId } = args;
-        //         console.log("parent", parent)
-
-        //         const res = await prisma.order.findMany({
-        //             where: {
-        //                 pizzaId: Number(pizzaId)
-        //             },
-        //             include: {
-        //                 pizza: {
-        //                     select: {
-        //                         name: true,
-        //                         id: true
-        //                     }
-        //                 },
-        //             },
-        //         })
-        //         console.log("res", res)
-        //         return res
-
-
-        //     } catch (e) {
-        //         console.error("Error in getOrdersForOnePizza Query: ", e);
-        //     }
-        // },
+                return res
+            } catch (e) {
+                console.error("Error in getRecipeForOnePizza Query: ", e);
+            }
+        },
     },
 };
-
-    // {
-                //     select: {
-                //         ingredient: true
-                //     }
-                // },
-                // include: {
-                //     posts: {
-                //       select: {
-                //         title: true,
-                //       },
-                //     },
-
-                // select: {
-                //     name: true,
-                //     posts: {
-                //       select: {
-                //         title: true,
-                //       },

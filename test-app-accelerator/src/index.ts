@@ -4,12 +4,10 @@ import { PrismaClient } from '@prisma/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { resolvers } from './schema/resolvers/resolvers'
-// import  typeDefs  from '../src/schema/index'
+
 const prisma = new PrismaClient();
 
 const main = async () => {
-    console.log("url", process.env.DATABASE_URL)
-    // console.log("resolvers", resolvers)
 
     /* The ApolloServer constructor requires two parameters: 
     *   - your schema
@@ -21,9 +19,6 @@ const main = async () => {
             'utf8'
         ),
         resolvers,
-        // context: {
-        //     prisma,
-        // }
     });
 
     // Passing an ApolloServer instance to the `startStandaloneServer` function:
